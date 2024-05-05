@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Select } from "@highlight-ui/select";
+import { Select, SelectOption } from "@highlight-ui/select";
 import { Input } from "@highlight-ui/input";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 
@@ -34,33 +34,51 @@ export const positions = [
   },
 ];
 
-const Filters: React.FunctionComponent = () => {
-  const onPositionFilterChange = (position: string) => {
-    console.log("position:", position);
-  };
-  const onSearchChange = (search: string) => {
-    console.log("search:", search);
-  };
+const Filters: React.FunctionComponent<{
+  onPositionFilterChange: Function;
+  onSearchChange: Function;
+}> = ({ onPositionFilterChange, onSearchChange }) => {
+  const [selectedPositions, setSelectedPositions] = React.useState<any>([]);
 
   return (
     <div className="flex items-center justify-between m-8">
       <div className="flex gap-5">
         <Select
+          data-testid="position-applied-select"
           enableFlowTriggers
           closeOnSelect
           options={positions}
-          onSelect={([{ value }]) => onPositionFilterChange(String(value))}
+          onSelect={(selected) => {
+            setSelectedPositions(selected);
+            onPositionFilterChange(selected[0].value);
+          }}
+          selectedOptions={selectedPositions}
           triggerLabel="Position Applied"
           variant="inline"
         />
       </div>
       <Input
+        autoFocus
+        data-testid="search-by-name-input"
         placeholder="Search by name"
         prefix={<MagnifyingGlassIcon className="h-4 w-4" />}
-        onChange={({ target: { value } }) => onSearchChange(value)}
+        onChange={debounce(({ target: { value } }: any) => {
+          onSearchChange(value);
+        }, 50)}
       />
     </div>
   );
+};
+
+const debounce = (callback: Function, wait: number) => {
+  let timeoutId: number | undefined = undefined;
+
+  return (...args: any) => {
+    window.clearTimeout(timeoutId);
+    timeoutId = window.setTimeout(() => {
+      callback(...args);
+    }, wait);
+  };
 };
 
 export default Filters;
