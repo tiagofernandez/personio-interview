@@ -9,5 +9,14 @@ describe("utils", () => {
     }).forEach(([key, value]) => {
       expect(calculateAge(key)).toBe(value);
     });
+    const today = new Date("05/06/2024");
+
+    Object.entries({
+      "08/01/1980": 43,
+      "05/05/1980": 43,
+      "06/05/1980": 44,
+    }).forEach(([key, value]) => {
+      expect(calculateAge(key, today)).toBe(value);
+    });
   });
 });
