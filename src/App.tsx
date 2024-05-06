@@ -5,11 +5,12 @@ import useApplications, { ApplicationResponse } from "./useApplications";
 
 const App: React.FunctionComponent = () => {
   const { data: rawData, isLoading } = useApplications();
+  const positionOptions = rawData ? getPositionOptions(rawData) : [];
 
   const [data, setData] = React.useState<ApplicationResponse[]>([]);
 
   const [name, setName] = React.useState("");
-  const [position, setPosition] = React.useState("");
+  const [position, setPosition] = React.useState(getPositionFromSearchParams());
 
   React.useEffect(() => {
     const allRecords = rawData ? [...rawData] : [];
@@ -18,16 +19,31 @@ const App: React.FunctionComponent = () => {
       name,
       position,
     });
-
     setData(filteredRecords);
   }, [rawData, name, position, setData]);
+
+  React.useEffect(() => {
+    syncSearchParams(position);
+  }, [position]);
 
   if (isLoading || !rawData) {
     return <div>Loading...</div>;
   }
   return (
     <div className="App">
-      <Filters onPositionFilterChange={setPosition} onSearchChange={setName} />
+      <Filters
+        positionOptions={positionOptions}
+        selectedPosition={position}
+        onPositionFilterChange={(position: string) => {
+          const data = filterData(rawData, {
+            name,
+            position,
+          });
+          setData(data);
+          setPosition(position);
+        }}
+        onSearchChange={setName}
+      />
       <Table data={data} />
     </div>
   );
@@ -58,6 +74,26 @@ const filterData = (
     );
   }
   return filteredRecords;
+};
+
+const getPositionOptions = (data: ApplicationResponse[]) => {
+  const positions = new Set();
+  data.forEach((candidate) => {
+    positions.add(candidate.position_applied);
+  });
+  return Array.from(positions).map((p) => ({ label: p, value: p }));
+};
+
+const getPositionFromSearchParams = () => {
+  const params = new URLSearchParams(location.search);
+  const position = params.get("position");
+  return position || "";
+};
+
+const syncSearchParams = (position: string) => {
+  let url = new URL(location.href);
+  url.searchParams.set("position", position);
+  history.pushState({}, "", url.href);
 };
 
 export default App;

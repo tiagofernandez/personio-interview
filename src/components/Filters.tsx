@@ -3,42 +3,24 @@ import { Select, SelectOption } from "@highlight-ui/select";
 import { Input } from "@highlight-ui/input";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 
-export const positions = [
-  {
-    label: "Agent",
-    value: "Agent",
-  },
-  {
-    label: "Orchestrator",
-    value: "Orchestrator",
-  },
-  {
-    label: "Technician",
-    value: "Technician",
-  },
-  {
-    label: "Engineer",
-    value: "Engineer",
-  },
-  {
-    label: "Designer",
-    value: "Designer",
-  },
-  {
-    label: "Sales person",
-    value: "Sales person",
-  },
-  {
-    label: "Manager",
-    value: "Manager",
-  },
-];
-
-const Filters: React.FunctionComponent<{
+type FilterProps = {
+  positionOptions: Array<any>;
   onPositionFilterChange: Function;
   onSearchChange: Function;
-}> = ({ onPositionFilterChange, onSearchChange }) => {
-  const [selectedPositions, setSelectedPositions] = React.useState<any>([]);
+  selectedPosition: string;
+};
+
+const Filters: React.FunctionComponent<FilterProps> = ({
+  positionOptions,
+  onPositionFilterChange,
+  onSearchChange,
+  selectedPosition,
+}) => {
+  const [selectedOptions, setSelectedOptions] = React.useState<any>([]);
+
+  React.useEffect(() => {
+    setSelectedOptions([{ label: selectedPosition, value: selectedPosition }]);
+  }, [selectedPosition]);
 
   return (
     <div className="flex items-center justify-between m-8">
@@ -47,12 +29,12 @@ const Filters: React.FunctionComponent<{
           data-testid="position-applied-select"
           enableFlowTriggers
           closeOnSelect
-          options={positions}
+          options={positionOptions}
           onSelect={(selected) => {
-            setSelectedPositions(selected);
+            setSelectedOptions(selected);
             onPositionFilterChange(selected[0].value);
           }}
-          selectedOptions={selectedPositions}
+          selectedOptions={selectedOptions}
           triggerLabel="Position Applied"
           variant="inline"
         />
